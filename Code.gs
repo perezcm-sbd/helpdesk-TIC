@@ -18,17 +18,20 @@ function sheet_() {
   return sh;
 }
 function out_(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }
+let WHY = '';
 function auth_(token) {
-  if (!token) return null;
+  if (!token) { WHY = 'sense token'; return null; }
   const cache = CacheService.getScriptCache();
   const key = 't' + Utilities.base64EncodeWebSafe(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, token)).slice(0, 40);
   let u = cache.get(key);
   if (u) return JSON.parse(u);
   const r = UrlFetchApp.fetch('https://oauth2.googleapis.com/tokeninfo?id_token=' + encodeURIComponent(token), { muteHttpExceptions: true });
-  if (r.getResponseCode() !== 200) return null;
+  if (r.getResponseCode() !== 200) { WHY = 'tokeninfo ' + r.getResponseCode(); return null; }
   const j = JSON.parse(r.getContentText());
   const email = String(j.email || '').toLowerCase();
-  if (j.aud !== P.getProperty('CLIENT_ID') || j.email_verified !== 'true' || j.hd !== DOMAIN || !email.endsWith('@' + DOMAIN)) return null;
+  if (j.aud !== P.getProperty('CLIENT_ID')) { WHY = 'aud diferent: ' + j.aud; return null; }
+  if (j.email_verified !== 'true') { WHY = 'correu no verificat'; return null; }
+  if (j.hd !== DOMAIN || !email.endsWith('@' + DOMAIN)) { WHY = 'domini: ' + j.hd; return null; }
   const tics = (P.getProperty('TIC_EMAILS') || '').toLowerCase().split(',').map(s => s.trim());
   const user = { email, name: j.name || email, tic: tics.includes(email) };
   cache.put(key, JSON.stringify(user), 300);
