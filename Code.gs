@@ -42,7 +42,7 @@ function doPost(e) {
   const lock = LockService.getScriptLock(); lock.waitLock(15000);
   try {
     const b = JSON.parse(e.postData.contents), me = auth_(b.token);
-    if (!me) return out_({ ok: false, error: 'auth' });
+    if (!me) return out_({ ok: false, error: 'auth', why: WHY });
     const sh = sheet_(), now = new Date().toISOString();
     if (b.action === 'list') {
       const rows = sh.getDataRange().getValues().slice(1).map(r => {
