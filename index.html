@@ -126,7 +126,7 @@ async function load(){
   if(!tok){showLogin();return}
   try{
     const d=await api({action:'list'});
-    if(!d.ok){tok='';sessionStorage.removeItem('tic_tok');showLogin(d.error==='auth'?'Cal un compte @flordemaig.cat o tornar a iniciar la sessió.':'Error: '+d.error);return}
+    if(!d.ok){tok='';sessionStorage.removeItem('tic_tok');showLogin(d.error==='auth'?'Cal un compte @flordemaig.cat o tornar a iniciar la sessió. ('+d.why+')'':'Error: '+d.error);return}
     me=d.me;tickets=d.tickets;$('#who').textContent=me.name;$('#fab').hidden=!d.chat||!$('#chat').hidden;
     $('#login').hidden=true;$('#app').hidden=false;render();
   }catch(e){showLogin('No s\'ha pogut connectar. Torna-ho a provar.')}
